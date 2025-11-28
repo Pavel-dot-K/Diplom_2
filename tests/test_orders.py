@@ -13,8 +13,8 @@ class TestCreateOrder:
             resp = requests.post(ORDERS, json=payload, headers=header_auth)
 
         with allure.step("Проверка статуса ответа"):
-            assert resp.status_code in (200, 201), (
-                f"Ожидали 200/201, получили {resp.status_code}: {resp.text}"
+            assert resp.status_code == 200, (
+                f"Ожидали 200, получили {resp.status_code}: {resp.text}"
             )
 
         with allure.step("Проверка успешности ответа и номера заказа"):
@@ -32,7 +32,7 @@ class TestCreateOrder:
 
         with allure.step("Проверка статуса ответа - ожидаем 401 Unauthorized"):
             assert resp.status_code == 401, (
-                f"Ожидали 401, получили {resp.status_code}: {resp.text}"
+                f"Ожидали 401, получили {resp.status_code}: {resp.text}" # Правка по комментарию №1
             )
 
         with allure.step("Проверка сообщения об ошибке авторизации"):
@@ -60,18 +60,19 @@ class TestCreateOrder:
         with allure.step("Отправка POST-запроса с неверным хешем ингредиента"):
             resp = requests.post(ORDERS, json=payload, headers=header_auth)
 
-        with allure.step("Проверка статуса ответа - ожидается 400 или 500, в зависимости от реализации"):
-            assert resp.status_code in (400, 500), (
-                f"Ожидали 400/500, получили {resp.status_code}: {resp.text}"
+        with allure.step("Проверка статуса ответа - ожидается 500"):
+            assert resp.status_code == 500, (
+                f"Ожидали 500, получили {resp.status_code}: {resp.text}" # Правка по комментарию №1
             )
 
     @allure.title("Создание заказа с неверным токеном")
     def test_order_with_invalid_token(self, ingredient_ids: List[str]):
         payload = {"ingredients": ingredient_ids[:2]}
         invalid_headers = {"Authorization": "Bearer invalid_token"}
-        resp = requests.post(ORDERS, json=payload, headers=invalid_headers)
+        with allure.step("Отправка POST-запроса с неверным токеном"): # Правка по комментарию №2
+            resp = requests.post(ORDERS, json=payload, headers=invalid_headers)
 
         with allure.step("Проверка статуса ответа"):
-            assert resp.status_code in (401, 403), (
-                f"Ожидали 401/403, получили {resp.status_code}: {resp.text}"
+            assert resp.status_code == 403, (
+                f"Ожидали 403, получили {resp.status_code}: {resp.text}" # Правка по комментарию №1
             )
